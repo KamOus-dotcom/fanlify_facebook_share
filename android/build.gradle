@@ -1,0 +1,31 @@
+group 'com.fanlify.facebookshare'
+version '0.1.0'
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.fanlify.facebookshare'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 23
+    }
+}
