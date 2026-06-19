@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import FBSDKCoreKit
 import FBSDKShareKit
 
 public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegate {
@@ -12,6 +13,7 @@ public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegat
     )
     let instance = FanlifyFacebookSharePlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
+    registrar.addApplicationDelegate(instance)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -21,6 +23,25 @@ public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegat
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  public func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
+  ) -> Bool {
+    ApplicationDelegate.shared.application(
+      application,
+      didFinishLaunchingWithOptions: launchOptions as? [UIApplication.LaunchOptionsKey: Any]
+    )
+    return true
+  }
+
+  public func application(
+    _ application: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    ApplicationDelegate.shared.application(application, open: url, options: options)
   }
 
   private func shareLink(call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -60,7 +81,11 @@ public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegat
     }
 
     pendingResult = result
-    dialog.show()
+    let didShow = dialog.show()
+
+    if !didShow {
+      finish("ERROR|message=dialog_show_returned_false")
+    }
   }
 
   public func sharer(_ sharer: Sharing, didCompleteWithResults results: [String: Any]) {
