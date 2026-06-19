@@ -103,7 +103,7 @@ public class FanlifyFacebookSharePlugin implements
     });
 
     final ShareDialog.Mode mode = dialogMode(requestedMode);
-    if (!ShareDialog.canShow(ShareLinkContent.class, mode)) {
+    if (!ShareDialog.canShow(content, mode)) {
       result.success("ERROR|mode=" + requestedMode + "|message=dialog_cannot_show");
       return;
     }
