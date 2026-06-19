@@ -5,6 +5,8 @@ import FBSDKShareKit
 
 public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegate {
   private var pendingResult: FlutterResult?
+  private var pendingMode = "automatic"
+  private var pendingDidShow = false
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
@@ -60,8 +62,10 @@ public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegat
       return
     }
 
+    let requestedMode = (args["mode"] as? String) ?? "automatic"
+
     guard let rootViewController = Self.rootViewController() else {
-      result("ERROR|message=no_root_view_controller")
+      result("ERROR|mode=\(requestedMode)|message=no_root_view_controller")
       return
     }
 
@@ -73,37 +77,55 @@ public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegat
       content: content,
       delegate: self
     )
-    dialog.mode = .automatic
+    dialog.mode = Self.dialogMode(from: requestedMode)
 
     guard dialog.canShow else {
-      result("ERROR|message=dialog_cannot_show")
+      result("ERROR|mode=\(requestedMode)|message=dialog_cannot_show")
       return
     }
 
     pendingResult = result
-    let didShow = dialog.show()
+    pendingMode = requestedMode
+    pendingDidShow = dialog.show()
 
-    if !didShow {
-      finish("ERROR|message=dialog_show_returned_false")
+    if !pendingDidShow {
+      finish("ERROR|mode=\(requestedMode)|message=dialog_show_returned_false")
     }
   }
 
   public func sharer(_ sharer: Sharing, didCompleteWithResults results: [String: Any]) {
-    finish("SUCCESS")
+    finish("SUCCESS|mode=\(pendingMode)|didShow=\(pendingDidShow)")
   }
 
   public func sharer(_ sharer: Sharing, didFailWithError error: Error) {
-    finish("ERROR|message=\(Self.escape(error.localizedDescription))")
+    finish("ERROR|mode=\(pendingMode)|didShow=\(pendingDidShow)|message=\(Self.escape(error.localizedDescription))")
   }
 
   public func sharerDidCancel(_ sharer: Sharing) {
-    finish("CANCEL")
+    finish("CANCEL|mode=\(pendingMode)|didShow=\(pendingDidShow)")
   }
 
   private func finish(_ value: String) {
     let result = pendingResult
     pendingResult = nil
+    pendingMode = "automatic"
+    pendingDidShow = false
     result?(value)
+  }
+
+  private static func dialogMode(from value: String) -> ShareDialog.Mode {
+    switch value.lowercased() {
+    case "native":
+      return .native
+    case "browser":
+      return .browser
+    case "web":
+      return .web
+    case "feedbrowser", "feed_browser", "feed-browser":
+      return .feedBrowser
+    default:
+      return .automatic
+    }
   }
 
   private static func rootViewController() -> UIViewController? {
