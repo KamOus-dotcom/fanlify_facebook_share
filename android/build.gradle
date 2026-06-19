@@ -29,3 +29,7 @@ android {
         minSdk 23
     }
 }
+
+dependencies {
+    implementation 'com.facebook.android:facebook-share:latest.release'
+}
