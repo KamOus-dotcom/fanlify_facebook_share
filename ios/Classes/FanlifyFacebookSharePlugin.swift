@@ -27,11 +27,11 @@ public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegat
 
   public func application(
     _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     ApplicationDelegate.shared.application(
       application,
-      didFinishLaunchingWithOptions: launchOptions as? [UIApplication.LaunchOptionsKey: Any]
+      didFinishLaunchingWithOptions: launchOptions
     )
     return true
   }
@@ -39,9 +39,9 @@ public class FanlifyFacebookSharePlugin: NSObject, FlutterPlugin, SharingDelegat
   public func application(
     _ application: UIApplication,
     open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    options: [UIApplication.OpenURLOptionsKey: Any]
   ) -> Bool {
-    ApplicationDelegate.shared.application(application, open: url, options: options)
+    return ApplicationDelegate.shared.application(application, open: url, options: options)
   }
 
   private func shareLink(call: FlutterMethodCall, result: @escaping FlutterResult) {
